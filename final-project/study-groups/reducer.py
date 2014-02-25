@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import heapq
 from itertools import takewhile
 
 ####
@@ -11,25 +10,21 @@ from itertools import takewhile
 
 ### Implement a monoid to accumulate the results
 
-zero = 0 
-      
+zero = []
+
 def clone(obj):
-    return 0 #obj.copy();
+    return list(obj);
 
-def add(acc, key, val):
-    return acc + float(val)
+def add(acc, val):
+    acc.append(val)
 
-def process_results(result):
-    values = sorted(result, reverse=True)
-    return values 
-
-### Keep the 10 top elements using a minheap
-topN = [(0, "")] * 10
+def results(acc):
+    return acc
 
 ### Print the results
-def print_result(result):
-    for (val, key) in process_results(result):
-        print key, "\t", val 
+def print_result(key, values):
+    if key != None:
+        print key, "\t", values 
 
 
 #####
@@ -43,11 +38,25 @@ oldKey = None
 # For this excercise it will return a row containing the author_id and the hour of maximum posts
 # returning multiple lines for each author in case there is a tie 
 #
-# It will use a simple process to reduce the input, this reduce can't be used as a combiner 
-# because it does not preserve the information about the number of posts for each author/time combination
+# This reducer will accumulate the author occurrances in a list for each thread id and print the thread id and list  
+# when finishing a thread id 
 #
 
-# This can just passthrough the output of the mapper
 for line in sys.stdin:
-    print line
+    data_mapped = line.strip().split("\t")
+    if len(data_mapped) != 2:
+        # Something has gone wrong. Skip this line.
+        continue
+
+    thisKey, thisValue = data_mapped
+
+    if oldKey and oldKey != thisKey:
+	print_result(oldKey, acc);
+        oldKey = thisKey;
+        acc = clone(zero)
+
+    oldKey = thisKey
+    add(acc, thisValue)
+
+print_result(oldKey, acc);
 
